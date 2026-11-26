@@ -1,0 +1,101 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: validator_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d validator_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: nette
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  device_registry:
+    build: .
+    command: fastapi run device_registry/main.py --port 8000 --host 0.0.0.0
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://admin:admin@postgres:5432/validator_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  incident_analytics:
+    build: .
+    command: fastapi run incident_analytics/main.py --port 8000 --host 0.0.0.0
+    ports:
+      - "8003:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://admin:admin@postgres:5432/validator_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  telemetry_service:
+    build: .
+    command: fastapi run telemetry_service/main.py --port 8000 --host 0.0.0.0
+    ports:
+      - "8002:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://admin:admin@postgres:5432/validator_db
+      DEVICE_SERVICE_URL: http://device_registry:8000
+      INCIDENT_SERVICE_URL: http://incident_analytics:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      device_registry:
+        condition: service_started
+      incident_analytics:
+        condition: service_started
+
+  api_gateway:
+    build: .
+    command: fastapi run api_gateway/main.py --port 8000 --host 0.0.0.0
+    ports:
+      - "8000:8000"
+    environment:
+      DEVICE_SERVICE_URL: http://device_registry:8000
+      TELEMETRY_SERVICE_URL: http://telemetry_service:8000
+      INCIDENT_SERVICE_URL: http://incident_analytics:8000
+    depends_on:
+      device_registry:
+        condition: service_started
+      telemetry_service:
+        condition: service_started
+      incident_analytics:
+        condition: service_started
+
+  simulator:
+    build: .
+    command: python -u simulator/main.py
+    environment:
+      DEVICE_SERVICE_URL: http://device_registry:8000
+      TELEMETRY_URL: http://telemetry_service:8000/telemetry
+    depends_on:
+      device_registry:
+        condition: service_started
+      telemetry_service:
+        condition: service_started
+      incident_analytics:
+        condition: service_started
+
+volumes:
+  postgres_data:
