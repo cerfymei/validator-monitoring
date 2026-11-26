@@ -4,6 +4,9 @@ from typing import Any
 import httpx
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
+from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
 
 DEVICE_SERVICE_URL = os.getenv("DEVICE_SERVICE_URL", "http://device_registry:8000")
 TELEMETRY_SERVICE_URL = os.getenv("TELEMETRY_SERVICE_URL", "http://telemetry_service:8000")
@@ -48,6 +51,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+FRONTEND_INDEX = Path(__file__).resolve().parent.parent / "frontend" / "index.html"
+
+
+@app.get("/", include_in_schema=False)
+async def serve_frontend():
+    return FileResponse(FRONTEND_INDEX)
 
 def resolve_upstream(path: str) -> str | None:
     clean = "/" + path.lstrip("/")
