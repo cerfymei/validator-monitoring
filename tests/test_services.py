@@ -16,6 +16,18 @@ import shared.db as shared_db
 import telemetry_service.main as ts_main
 
 
+def log_resp(step: str, resp):
+    if resp.status_code == 204:
+        body = "<204 No Content>"
+    else:
+        try:
+            body = resp.json()
+        except Exception:
+            body = resp.text
+    print(f"\n  [{resp.status_code}] {step} -> {body}")
+    return resp
+
+
 @pytest.fixture(name="clients")
 def clients_fixture(monkeypatch):
     test_engine = create_engine(
@@ -69,154 +81,180 @@ def test_vehicle_and_validator_lifecycle(clients):
     dr_client, _, _ = clients
 
     # 1. Создание ТС
-    veh = dr_client.post("/vehicles", json={
+    veh = log_resp("Создание ТС", dr_client.post("/vehicles", json={
         "bort_number": "А100ВС77",
         "route_number": "М15",
         "model": "ЛиАЗ-5292",
         "is_active": True,
-    })
+    }))
     assert veh.status_code == 201
     veh_id = veh.json()["id"]
 
     # Дубликат ТС -> 409
-    dup_veh = dr_client.post("/vehicles", json={
+    dup_veh = log_resp("Дубликат ТС (ошибка)", dr_client.post("/vehicles", json={
         "bort_number": "А100ВС77",
         "route_number": "М15",
         "model": "ЛиАЗ-5292",
-    })
+    }))
     assert dup_veh.status_code == 409
 
     # 2. Регистрация валидатора
-    val = dr_client.post("/validators", json={
+    val = log_resp("Регистрация валидатора", dr_client.post("/validators", json={
         "serial_number": "SN-100",
         "model": "Validator Pro X2",
         "mac_address": "AA:BB:CC:11:22:33",
         "manufacture_date": "2026-01-10",
-    })
+    }))
     assert val.status_code == 201
     assert val.json()["status"] == "На складе"
     v_id = val.json()["id"]
 
     # 3. Привязка к неактивному ТС -> 400
-    inactive_veh = dr_client.post("/vehicles", json={
+    inactive_veh = log_resp("Создание ТС в депо", dr_client.post("/vehicles", json={
         "bort_number": "Х999ХХ77",
         "route_number": "900",
         "model": "НефАЗ",
         "is_active": False,
-    }).json()
-    bad_bind = dr_client.put(f"/validators/{v_id}/vehicle", json={"vehicle_id": inactive_veh["id"]})
+    })).json()
+    bad_bind = log_resp("Привязка к ТС в депо (ошибка)", dr_client.put(
+        f"/validators/{v_id}/vehicle",
+        json={"vehicle_id": inactive_veh["id"]},
+    ))
     assert bad_bind.status_code == 400
 
     # 4. Успешная привязка к активному ТС (PUT)
-    good_bind = dr_client.put(f"/validators/{v_id}/vehicle", json={"vehicle_id": veh_id})
+    good_bind = log_resp("Привязка к активному ТС", dr_client.put(
+        f"/validators/{v_id}/vehicle",
+        json={"vehicle_id": veh_id},
+    ))
     assert good_bind.status_code == 200
     assert good_bind.json()["status"] == "На линии"
     assert good_bind.json()["vehicle"]["bort_number"] == "А100ВС77"
 
     # Нельзя удалить валидатор, пока он на линии -> 400
-    assert dr_client.delete(f"/validators/{v_id}").status_code == 400
+    del_online = log_resp("Удаление валидатора на линии (ошибка)", dr_client.delete(f"/validators/{v_id}"))
+    assert del_online.status_code == 400
 
     # 5. Снятие с ТС в ремонт (DELETE /vehicle)
-    dismount = dr_client.delete(f"/validators/{v_id}/vehicle", params={"reason": "поломка кулера"})
+    dismount = log_resp("Снятие валидатора в ремонт", dr_client.delete(
+        f"/validators/{v_id}/vehicle",
+        params={"reason": "поломка кулера"},
+    ))
     assert dismount.status_code == 200
     assert dismount.json()["status"] == "В ремонте"
     assert dismount.json()["vehicle_id"] is None
 
     # 6. Возврат из ремонта на склад и обновление прошивки (PATCH)
-    repaired = dr_client.patch(f"/validators/{v_id}", json={
-        "firmware_version": "2.2.0",
-        "status": "На складе",
-    })
+    repaired = log_resp("Возврат на склад и обновление прошивки", dr_client.patch(
+        f"/validators/{v_id}",
+        json={"firmware_version": "2.2.0", "status": "На складе"},
+    ))
     assert repaired.status_code == 200
     assert repaired.json()["status"] == "На складе"
     assert repaired.json()["firmware_version"] == "2.2.0"
 
     # 7. Удаление валидатора (DELETE -> 204)
-    assert dr_client.delete(f"/validators/{v_id}").status_code == 204
-    assert dr_client.get(f"/validators/{v_id}").status_code == 404
+    deleted = log_resp("Удаление валидатора", dr_client.delete(f"/validators/{v_id}"))
+    assert deleted.status_code == 204
+
+    not_found = log_resp("Запрос удалённого валидатора (ошибка)", dr_client.get(f"/validators/{v_id}"))
+    assert not_found.status_code == 404
 
 
 def test_telemetry_incidents_notifications_and_cascade(clients):
     dr_client, ts_client, ia_client = clients
 
-    v_id = dr_client.post("/validators", json={
+    v_id = log_resp("Регистрация валидатора для телеметрии", dr_client.post("/validators", json={
         "serial_number": "SN-200",
         "model": "Validator Pro X2",
         "mac_address": "AA:BB:CC:11:22:44",
         "manufacture_date": "2026-02-01",
-    }).json()["id"]
+    })).json()["id"]
 
     # Телеметрия для несуществующего валидатора -> 404
-    missing_resp = ts_client.post("/telemetry", json={
+    missing_resp = log_resp("Телеметрия несуществующего валидатора (ошибка)", ts_client.post("/telemetry", json={
         "validator_id": 9999,
         "temperature": 45.0,
         "voltage": 12.5,
         "nfc_is_working": True,
-    })
+    }))
     assert missing_resp.status_code == 404
 
     # 1. Нормальная телеметрия
-    ok_resp = ts_client.post("/telemetry", json={
+    ok_resp = log_resp("Нормальная телеметрия", ts_client.post("/telemetry", json={
         "validator_id": v_id,
         "temperature": 45.0,
         "voltage": 12.5,
         "nfc_is_working": True,
-    })
+    }))
     assert ok_resp.status_code == 201
     assert ok_resp.json()["incident_triggered"] is False
 
-    status_resp = ts_client.get(f"/telemetry/status/{v_id}")
+    status_resp = log_resp("Онлайн-статус валидатора", ts_client.get(f"/telemetry/status/{v_id}"))
     assert status_resp.status_code == 200
     assert status_resp.json()["status"] == "Online"
 
     # 2. Перегрев -> создаётся инцидент со ссылкой на telemetry_id и уведомление
-    fail_resp = ts_client.post("/telemetry", json={
+    fail_resp = log_resp("Телеметрия с перегревом (88.5°C)", ts_client.post("/telemetry", json={
         "validator_id": v_id,
         "temperature": 88.5,
         "voltage": 12.4,
         "nfc_is_working": True,
-    })
+    }))
     assert fail_resp.status_code == 201
     assert fail_resp.json()["incident_triggered"] is True
     inc_id = fail_resp.json()["incident_id"]
     tel_id = fail_resp.json()["telemetry"]["id"]
 
     # Повторный перегрев при активном инциденте не создаёт дубликат
-    dup_fail = ts_client.post("/telemetry", json={
+    dup_fail = log_resp("Повторный перегрев (дедупликация)", ts_client.post("/telemetry", json={
         "validator_id": v_id,
         "temperature": 90.0,
         "voltage": 12.4,
         "nfc_is_working": True,
-    })
+    }))
     assert dup_fail.status_code == 201
     assert dup_fail.json()["incident_triggered"] is False
 
     # Детальная карточка инцидента содержит telemetry_id и вложенные уведомления
-    detail = ia_client.get(f"/incidents/{inc_id}")
+    detail = log_resp("Детальная карточка инцидента", ia_client.get(f"/incidents/{inc_id}"))
     assert detail.status_code == 200
     assert detail.json()["telemetry_id"] == tel_id
     assert len(detail.json()["notifications"]) == 1
     notif_id = detail.json()["notifications"][0]["id"]
 
     # 3. Отмечаем уведомление прочитанным + переводим инцидент в работу и закрываем (PATCH)
-    assert ia_client.patch(f"/notifications/{notif_id}", json={"is_read": True}).json()["is_read"] is True
-    assert ia_client.patch(f"/incidents/{inc_id}", json={"status": "В работе"}).json()["status"] == "В работе"
-    closed = ia_client.patch(f"/incidents/{inc_id}", json={
+    read_resp = log_resp("Уведомление прочитано", ia_client.patch(
+        f"/notifications/{notif_id}",
+        json={"is_read": True},
+    ))
+    assert read_resp.json()["is_read"] is True
+
+    take_resp = log_resp("Взятие инцидента в работу", ia_client.patch(
+        f"/incidents/{inc_id}",
+        json={"status": "В работе"},
+    ))
+    assert take_resp.json()["status"] == "В работе"
+
+    closed = log_resp("Закрытие инцидента", ia_client.patch(f"/incidents/{inc_id}", json={
         "status": "Закрыт",
         "engineer_comment": "Замена кулера",
-    })
+    }))
     assert closed.status_code == 200
     assert closed.json()["status"] == "Закрыт"
     assert closed.json()["closed_at"] is not None
 
-    analytics = ia_client.get("/analytics").json()
-    assert analytics["total_incidents"] == 1
-    assert analytics["closed_incidents"] == 1
-    assert analytics["unread_notifications"] == 0
+    analytics = log_resp("Аналитика после ремонта", ia_client.get("/analytics"))
+    assert analytics.json()["total_incidents"] == 1
+    assert analytics.json()["closed_incidents"] == 1
+    assert analytics.json()["unread_notifications"] == 0
 
     # 4. Каскадное удаление инцидента удаляет и уведомление
-    assert ia_client.delete(f"/incidents/{inc_id}").status_code == 204
-    assert ia_client.get("/notifications").json() == []
+    del_inc = log_resp("Удаление инцидента (каскад)", ia_client.delete(f"/incidents/{inc_id}"))
+    assert del_inc.status_code == 204
+
+    notifs_after = log_resp("Уведомления после удаления инцидента", ia_client.get("/notifications"))
+    assert notifs_after.json() == []
 
 
 def test_gateway_openapi_aggregation(monkeypatch):
@@ -246,7 +284,9 @@ def test_gateway_openapi_aggregation(monkeypatch):
     monkeypatch.setattr(gw_main.httpx, "get", fake_gw_get)
 
     gw_client = TestClient(gw_main.app)
-    openapi = gw_client.get("/openapi.json").json()
+    resp = gw_client.get("/openapi.json")
+    openapi = resp.json()
+    print(f"\n  [{resp.status_code}] Сборка OpenAPI на Gateway -> пути: {list(openapi['paths'].keys())}")
 
     assert "/vehicles" in openapi["paths"]
     assert "/validators" in openapi["paths"]

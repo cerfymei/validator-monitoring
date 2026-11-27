@@ -6,18 +6,18 @@
   <title>Мониторинг валидаторов</title>
   <style>
     :root {
-      --bg: #f3f5f9;
+      --bg: #f4f6f9;
       --card: #ffffff;
       --text: #1e293b;
       --muted: #64748b;
       --border: #e2e8f0;
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
-      --green: #16a34a;
+      --green: #15803d;
       --green-bg: #dcfce7;
-      --yellow: #ca8a04;
+      --yellow: #a16207;
       --yellow-bg: #fef9c3;
-      --red: #dc2626;
+      --red: #b91c1c;
       --red-bg: #fee2e2;
       --gray-bg: #f1f5f9;
     }
@@ -41,11 +41,7 @@
       justify-content: space-between;
       gap: 12px;
     }
-    header h1 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-    }
+    header h1 { margin: 0; font-size: 18px; font-weight: 600; }
     .header-right {
       display: flex;
       flex-wrap: wrap;
@@ -64,16 +60,17 @@
     .nav-link:hover { background: #334155; }
 
     .container {
-      max-width: 1320px;
+      max-width: 1120px;
       margin: 20px auto;
       padding: 0 16px 40px;
     }
 
+    /* 4 главные цифры */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
     }
     .kpi {
       background: var(--card);
@@ -81,44 +78,60 @@
       border-radius: 10px;
       padding: 14px 16px;
     }
-    .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .kpi-label { font-size: 12px; color: var(--muted); }
     .kpi-value { font-size: 26px; font-weight: 700; margin-top: 4px; }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+    /* Вкладки */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-bottom: 16px;
     }
-    @media (max-width: 960px) {
-      .grid-2 { grid-template-columns: 1fr; }
+    .tab-btn {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      cursor: pointer;
     }
+    .tab-btn:hover { background: #f8fafc; color: var(--text); }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .tab-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: var(--red);
+      color: #fff;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 16px;
+      padding: 18px;
       margin-bottom: 16px;
       overflow-x: auto;
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 8px;
-    }
-    .card h2 { margin: 0; font-size: 16px; }
+    .card h2 { margin: 0 0 4px; font-size: 17px; }
+    .hint { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th, td {
       text-align: left;
-      padding: 9px 10px;
+      padding: 10px 10px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }
@@ -132,7 +145,7 @@
 
     .badge {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
@@ -148,36 +161,60 @@
       border: 1px solid var(--border);
       background: #fff;
       color: var(--text);
-      padding: 5px 10px;
+      padding: 6px 11px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
     }
     button:hover { background: #f8fafc; }
     .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-danger { color: var(--red); border-color: #fecaca; }
+    .btn-success { background: var(--green-bg); color: var(--green); border-color: #bbf7d0; }
+    .btn-success:hover { background: #bbf7d0; }
+    .btn-danger { background: #fff; color: var(--red); border-color: #fecaca; }
     .btn-danger:hover { background: var(--red-bg); }
-    .btn-success { color: var(--green); border-color: #bbf7d0; }
-    .btn-success:hover { background: var(--green-bg); }
+    .btn-warn { background: var(--yellow-bg); color: var(--yellow); border-color: #fde68a; }
+    .btn-warn:hover { background: #fef08a; }
 
-    .form-row {
+    .actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+    /* Простые формы с подписями над полями */
+    .form-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 16px;
+    }
+    .form-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+    .fields {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px dashed var(--border);
+      gap: 12px;
+      align-items: flex-end;
     }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 12px; color: var(--muted); font-weight: 500; }
     input, select {
-      padding: 6px 9px;
+      padding: 7px 10px;
       border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 13px;
       background: #fff;
+      min-width: 140px;
     }
-    label { font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+
+    .preset-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
 
     .toast {
       position: fixed;
@@ -194,129 +231,186 @@
     }
     .toast.ok { background: #16a34a; display: block; }
     .toast.err { background: #dc2626; display: block; }
-
-    .service-dots { display: flex; gap: 8px; flex-wrap: wrap; }
-    .dot { font-size: 12px; padding: 3px 8px; border-radius: 6px; background: #1e293b; }
-    .dot.ok { color: #4ade80; }
-    .dot.bad { color: #f87171; }
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1>Мониторинг валидаторов общественного транспорта</h1>
-    </div>
+    <h1>Мониторинг валидаторов</h1>
     <div class="header-right">
-      <div class="service-dots" id="healthDots"></div>
+      <span id="healthBadge" style="color:#94a3b8;">Проверка сервисов...</span>
       <label style="color:#cbd5e1; cursor:pointer;">
-        <input type="checkbox" id="autoRefresh" checked /> Автообновление (5с)
+        <input type="checkbox" id="autoRefresh" checked /> Авто (5с)
       </label>
-      <button onclick="loadAll()">Обновить</button>
+      <button onclick="loadAll(false)">Обновить</button>
       <a class="nav-link" href="/docs" target="_blank">Swagger API</a>
-      <a class="nav-link" href="http://localhost:8080" target="_blank">Adminer (БД)</a>
+      <a class="nav-link" href="http://localhost:8080" target="_blank">База (Adminer)</a>
     </div>
   </header>
 
   <div class="container">
-    <!-- KPI -->
+    <!-- Главные 4 цифры -->
     <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-label">Валидаторов на линии</div><div class="kpi-value" id="kpiOnline">—</div></div>
-      <div class="kpi"><div class="kpi-label">Открыто инцидентов</div><div class="kpi-value" id="kpiOpen" style="color:var(--red)">—</div></div>
-      <div class="kpi"><div class="kpi-label">В работе</div><div class="kpi-value" id="kpiProgress" style="color:var(--yellow)">—</div></div>
-      <div class="kpi"><div class="kpi-label">Закрыто инцидентов</div><div class="kpi-value" id="kpiClosed" style="color:var(--green)">—</div></div>
-      <div class="kpi"><div class="kpi-label">Непрочит. уведомлений</div><div class="kpi-value" id="kpiUnread">—</div></div>
-      <div class="kpi"><div class="kpi-label">Средний ремонт (SLA)</div><div class="kpi-value" id="kpiAvg">—</div></div>
-    </div>
-
-    <!-- Валидаторы -->
-    <div class="card">
-      <div class="card-header">
-        <h2>Валидаторы (Контекст 1)</h2>
+      <div class="kpi">
+        <div class="kpi-label">Валидаторов на линии</div>
+        <div class="kpi-value" id="kpiOnline">—</div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Серийный номер</th>
-            <th>Модель / Прошивка</th>
-            <th>Статус</th>
-            <th>Сеть (Контекст 2)</th>
-            <th>Автобус (ТС)</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody id="validatorsBody"></tbody>
-      </table>
-
-      <form class="form-row" onsubmit="createValidator(event)">
-        <strong style="font-size:13px;">+ Валидатор:</strong>
-        <input id="vSerial" placeholder="VAL-2026-0099" required />
-        <input id="vModel" placeholder="Validator Pro X2" value="Validator Pro X2" required />
-        <input id="vMac" placeholder="AA:BB:CC:11:22:99" required />
-        <input id="vDate" type="date" value="2026-03-01" required />
-        <button class="btn-primary" type="submit">Зарегистрировать</button>
-      </form>
-    </div>
-
-    <div class="grid-2">
-      <!-- ТС -->
-      <div class="card">
-        <div class="card-header"><h2>Транспортные средства</h2></div>
-        <table>
-          <thead>
-            <tr><th>ID</th><th>Борт №</th><th>Маршрут</th><th>Модель</th><th>Статус</th></tr>
-          </thead>
-          <tbody id="vehiclesBody"></tbody>
-        </table>
-        <form class="form-row" onsubmit="createVehicle(event)">
-          <strong style="font-size:13px;">+ ТС:</strong>
-          <input id="busBort" placeholder="Е555КХ77" required style="width:110px" />
-          <input id="busRoute" placeholder="М15" required style="width:80px" />
-          <input id="busModel" placeholder="ЛиАЗ-5292" required style="width:130px" />
-          <button class="btn-primary" type="submit">Добавить</button>
-        </form>
+      <div class="kpi">
+        <div class="kpi-label">Открытые поломки</div>
+        <div class="kpi-value" id="kpiOpen" style="color:var(--red)">—</div>
       </div>
-
-      <!-- Тестовая телеметрия -->
-      <div class="card">
-        <div class="card-header"><h2>Телеметрия (Контекст 2)</h2></div>
-        <form class="form-row" style="margin-top:0; padding-top:0; border-top:none; margin-bottom:12px;" onsubmit="sendTelemetry(event)">
-          <strong style="font-size:13px;">Тест-пакет:</strong>
-          <select id="telValidatorId"></select>
-          <input id="telTemp" type="number" step="0.1" value="88.5" style="width:80px" title="Температура °C" /> °C
-          <input id="telVolt" type="number" step="0.1" value="13.2" style="width:75px" title="Напряжение В" /> В
-          <label><input id="telNfc" type="checkbox" checked /> NFC</label>
-          <button class="btn-primary" type="submit">Отправить</button>
-        </form>
-        <table>
-          <thead>
-            <tr><th>ID</th><th>Валидатор</th><th>Темп.</th><th>Напряж.</th><th>NFC</th><th>Время</th></tr>
-          </thead>
-          <tbody id="telemetryBody"></tbody>
-        </table>
+      <div class="kpi">
+        <div class="kpi-label">Починено (закрыто)</div>
+        <div class="kpi-value" id="kpiClosed" style="color:var(--green)">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Среднее время ремонта</div>
+        <div class="kpi-value" id="kpiAvg">—</div>
       </div>
     </div>
 
-    <div class="grid-2">
-      <!-- Инциденты -->
+    <!-- Навигация по вкладкам -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('incidents', this)">
+        Поломки (Инциденты) <span class="tab-badge" id="tabIncBadge" style="display:none">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('validators', this)">Валидаторы</button>
+      <button class="tab-btn" onclick="switchTab('vehicles', this)">Автобусы (ТС)</button>
+      <button class="tab-btn" onclick="switchTab('telemetry', this)">Телеметрия (датчики)</button>
+    </div>
+
+    <!-- ВКЛАДКА 1: ИНЦИДЕНТЫ И УВЕДОМЛЕНИЯ -->
+    <div id="tab-incidents" class="tab-panel active">
       <div class="card">
-        <div class="card-header"><h2>Инциденты (Контекст 3)</h2></div>
+        <h2>Активные и прошлые поломки</h2>
+        <p class="hint">Когда валидатор перегревается или ломается NFC, здесь автоматически появляется заявка для инженера.</p>
         <table>
           <thead>
-            <tr><th>ID</th><th>Валид.</th><th>Ошибка</th><th>Статус</th><th>Комментарий</th><th>Действия</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Валидатор</th>
+              <th>Что сломалось</th>
+              <th>Статус</th>
+              <th>Комментарий</th>
+              <th>Действия</th>
+            </tr>
           </thead>
           <tbody id="incidentsBody"></tbody>
         </table>
       </div>
 
-      <!-- Уведомления -->
       <div class="card">
-        <div class="card-header"><h2>Уведомления инженерам</h2></div>
+        <h2>Уведомления инженерам</h2>
         <table>
           <thead>
-            <tr><th>ID</th><th>Сообщение</th><th>Статус</th><th></th></tr>
+            <tr><th>#</th><th>Сообщение</th><th>Статус</th><th></th></tr>
           </thead>
           <tbody id="notificationsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 2: ВАЛИДАТОРЫ -->
+    <div id="tab-validators" class="tab-panel">
+      <div class="card">
+        <h2>Парк валидаторов</h2>
+        <p class="hint">Чтобы поставить валидатор в автобус, сам автобус должен быть «На маршруте», а валидатор — «На складе».</p>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Серийный номер</th>
+              <th>Статус</th>
+              <th>Связь</th>
+              <th>Автобус</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="validatorsBody"></tbody>
+        </table>
+
+        <form class="form-box" onsubmit="createValidator(event)">
+          <div class="form-title">Добавить новый валидатор на склад</div>
+          <div class="fields">
+            <div class="field">
+              <label>Серийный номер</label>
+              <input id="vSerial" placeholder="VAL-2026-0099" required />
+            </div>
+            <div class="field">
+              <label>Модель</label>
+              <input id="vModel" value="Validator Pro X2" required />
+            </div>
+            <div class="field">
+              <label>MAC-адрес</label>
+              <input id="vMac" placeholder="AA:BB:CC:11:22:99" required />
+            </div>
+            <div class="field">
+              <label>Дата выпуска</label>
+              <input id="vDate" type="date" value="2026-03-01" required />
+            </div>
+            <button class="btn-primary" type="submit">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 3: АВТОБУСЫ -->
+    <div id="tab-vehicles" class="tab-panel">
+      <div class="card">
+        <h2>Автобусы автопарка</h2>
+        <p class="hint">Автобусы со статусом «В депо» можно выпустить на маршрут кнопкой справа — тогда на них можно будет ставить валидаторы.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Бортовой номер</th>
+              <th>Маршрут</th>
+              <th>Модель</th>
+              <th>Статус</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="vehiclesBody"></tbody>
+        </table>
+
+        <form class="form-box" onsubmit="createVehicle(event)">
+          <div class="form-title">Добавить новый автобус</div>
+          <div class="fields">
+            <div class="field">
+              <label>Бортовой номер</label>
+              <input id="busBort" placeholder="Е555КХ77" required />
+            </div>
+            <div class="field">
+              <label>Маршрут</label>
+              <input id="busRoute" placeholder="М15" required />
+            </div>
+            <div class="field">
+              <label>Модель автобуса</label>
+              <input id="busModel" placeholder="ЛиАЗ-5292" required />
+            </div>
+            <button class="btn-primary" type="submit">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 4: ТЕЛЕМЕТРИЯ -->
+    <div id="tab-telemetry" class="tab-panel">
+      <div class="card">
+        <h2>Проверка датчиков (телеметрия)</h2>
+        <p class="hint">Выберите валидатор и нажмите одну из кнопок, чтобы проверить реакцию системы без ввода цифр вручную.</p>
+
+        <div class="preset-bar">
+          <label style="font-size:13px; font-weight:600;">Валидатор:</label>
+          <select id="telValidatorId"></select>
+          <button class="btn-success" onclick="sendPreset(50.0, 13.2, true)">Отправить норму (50°C, 13.2В, NFC ОК)</button>
+          <button class="btn-danger" onclick="sendPreset(90.0, 13.0, false)">Имитировать поломку (90°C, NFC сбой)</button>
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>#</th><th>Валидатор</th><th>Температура</th><th>Напряжение</th><th>NFC</th><th>Время</th><th></th></tr>
+          </thead>
+          <tbody id="telemetryBody"></tbody>
         </table>
       </div>
     </div>
@@ -325,7 +419,15 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    let vehiclesCache = [];
+    let currentTab = "incidents";
+
+    function switchTab(name, btn) {
+      currentTab = name;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-" + name).classList.add("active");
+    }
 
     function esc(val) {
       if (val === null || val === undefined) return "";
@@ -341,7 +443,7 @@
       el.textContent = msg;
       el.className = "toast " + (isErr ? "err" : "ok");
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => { el.className = "toast"; }, 3200);
+      window._toastTimer = setTimeout(() => { el.className = "toast"; }, 3000);
     }
 
     async function api(url, options = {}) {
@@ -351,154 +453,162 @@
       });
       if (resp.status === 204) return null;
       const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) {
-        throw new Error(data.detail || `Ошибка HTTP ${resp.status}`);
-      }
+      if (!resp.ok) throw new Error(data.detail || `Ошибка HTTP ${resp.status}`);
       return data;
     }
 
-    function statusBadge(status) {
-      if (status === "На линии" || status === "Online" || status === "Закрыт") return `<span class="badge b-green">${esc(status)}</span>`;
-      if (status === "В ремонте" || status === "В работе") return `<span class="badge b-yellow">${esc(status)}</span>`;
-      if (status === "Открыт" || status === "Списан") return `<span class="badge b-red">${esc(status)}</span>`;
-      return `<span class="badge b-gray">${esc(status)}</span>`;
+    function badge(text) {
+      if (["На линии", "Online", "Закрыт", "На маршруте"].includes(text)) return `<span class="badge b-green">${esc(text)}</span>`;
+      if (["В ремонте", "В работе"].includes(text)) return `<span class="badge b-yellow">${esc(text)}</span>`;
+      if (["Открыт", "Списан"].includes(text)) return `<span class="badge b-red">${esc(text)}</span>`;
+      return `<span class="badge b-gray">${esc(text)}</span>`;
     }
 
-    async function loadAll() {
+    async function loadAll(isBackground = true) {
+      // Не перерисовываем выпадающие списки, если пользователь прямо сейчас выбирает автобус
+      if (isBackground && document.activeElement && document.activeElement.tagName === "SELECT") {
+        return;
+      }
+
       try {
         const [health, analytics, vehicles, validators, telemetry, incidents, notifications] = await Promise.all([
           api("/health").catch(() => null),
           api("/analytics"),
           api("/vehicles"),
           api("/validators"),
-          api("/telemetry?limit=10"),
+          api("/telemetry?limit=15"),
           api("/incidents"),
           api("/notifications?limit=15"),
         ]);
 
-        vehiclesCache = vehicles;
-
-        // Health dots
+        // Статус сервисов
         if (health && health.services) {
-          document.getElementById("healthDots").innerHTML = Object.entries(health.services)
-            .map(([k, v]) => `<span class="dot ${v === "ok" ? "ok" : "bad"}">● ${esc(k)}</span>`)
-            .join("");
+          const allOk = Object.values(health.services).every(s => s === "ok");
+          const hb = document.getElementById("healthBadge");
+          hb.textContent = allOk ? "Все 3 сервиса работают" : "Есть сбой сервиса";
+          hb.style.color = allOk ? "#4ade80" : "#f87171";
         }
 
-        // KPI
+        // 4 главные цифры
         const onLineCount = validators.filter(v => v.status === "На линии").length;
-        document.getElementById("kpiOnline").textContent = `${onLineCount} / ${validators.length}`;
-        document.getElementById("kpiOpen").textContent = analytics.open_incidents;
-        document.getElementById("kpiProgress").textContent = analytics.in_progress_incidents;
+        document.getElementById("kpiOnline").textContent = `${onLineCount} из ${validators.length}`;
+        document.getElementById("kpiOpen").textContent = analytics.open_incidents + analytics.in_progress_incidents;
         document.getElementById("kpiClosed").textContent = analytics.closed_incidents;
-        document.getElementById("kpiUnread").textContent = analytics.unread_notifications;
         document.getElementById("kpiAvg").textContent = `${analytics.avg_repair_seconds} с`;
 
-        // Online statuses for validators
-        const statusResults = await Promise.allSettled(
-          validators.map(v => api(`/telemetry/status/${v.id}`))
-        );
+        const activeIncCount = analytics.open_incidents + analytics.in_progress_incidents;
+        const incBadge = document.getElementById("tabIncBadge");
+        incBadge.textContent = activeIncCount;
+        incBadge.style.display = activeIncCount > 0 ? "inline-block" : "none";
+
+        // Онлайн-статусы валидаторов
+        const statusResults = await Promise.allSettled(validators.map(v => api(`/telemetry/status/${v.id}`)));
         const netMap = {};
         statusResults.forEach((res, idx) => {
-          if (res.status === "fulfilled") netMap[validators[idx].id] = res.value;
+          if (res.status === "fulfilled") netMap[validators[idx].id] = res.value.status;
         });
 
-        // Validators table
+        // 1. Инциденты
+        document.getElementById("incidentsBody").innerHTML = incidents.length
+          ? incidents.map(i => `
+              <tr>
+                <td>#${i.id}</td>
+                <td><b>Валидатор #${i.validator_id}</b></td>
+                <td><b>${esc(i.error_type)}</b></td>
+                <td>${badge(i.status)}</td>
+                <td>${esc(i.engineer_comment) || "—"}</td>
+                <td>
+                  <div class="actions">
+                    ${i.status === "Открыт" ? `<button class="btn-warn" onclick="takeIncident(${i.id})">Взять в работу</button>` : ""}
+                    ${i.status !== "Закрыт" ? `<button class="btn-success" onclick="closeIncident(${i.id})">Починено (Закрыть)</button>` : ""}
+                    <button class="btn-danger" onclick="deleteIncident(${i.id})">Удалить</button>
+                  </div>
+                </td>
+              </tr>
+            `).join("")
+          : `<tr><td colspan="6" style="color:var(--muted); text-align:center;">Поломок пока нет</td></tr>`;
+
+        // Уведомления
+        document.getElementById("notificationsBody").innerHTML = notifications.length
+          ? notifications.map(n => `
+              <tr>
+                <td>#${n.id}</td>
+                <td>${esc(n.message)}</td>
+                <td>${n.is_read ? badge("Прочитано") : `<span class="badge b-red">Новое</span>`}</td>
+                <td>${n.is_read ? "" : `<button onclick="markRead(${n.id})">Прочитано</button>`}</td>
+              </tr>
+            `).join("")
+          : `<tr><td colspan="4" style="color:var(--muted); text-align:center;">Уведомлений нет</td></tr>`;
+
+        // 2. Валидаторы
+        const activeBuses = vehicles.filter(b => b.is_active);
         document.getElementById("validatorsBody").innerHTML = validators.map(v => {
-          const net = netMap[v.id];
-          const netHtml = net ? statusBadge(net.status) : `<span class="badge b-gray">—</span>`;
-          const busHtml = v.vehicle
-            ? `<b>${esc(v.vehicle.bort_number)}</b> (марш. ${esc(v.vehicle.route_number)})`
-            : `<span style="color:var(--muted)">—</span>`;
+          const netStatus = netMap[v.id] || "Offline";
+          const busText = v.vehicle ? `<b>${esc(v.vehicle.bort_number)}</b> (марш. ${esc(v.vehicle.route_number)})` : "—";
 
           let actions = "";
           if (v.status === "На складе") {
-            const activeBuses = vehicles.filter(b => b.is_active);
             const opts = activeBuses.map(b => `<option value="${b.id}">${esc(b.bort_number)} (${esc(b.route_number)})</option>`).join("");
             actions = activeBuses.length
-              ? `<select id="bindSel_${v.id}" style="padding:3px 6px;">${opts}</select>
-                 <button class="btn-primary" onclick="bindValidator(${v.id})">На линию</button>`
-              : `<span style="color:var(--muted)">Нет активных ТС</span>`;
+              ? `<select id="bindSel_${v.id}">${opts}</select>
+                 <button class="btn-primary" onclick="bindValidator(${v.id})">Поставить в автобус</button>
+                 <button class="btn-danger" onclick="deleteValidator(${v.id})">Удалить</button>`
+              : `<span style="color:var(--muted)">Нет автобусов на маршруте</span>`;
           } else if (v.status === "На линии") {
             actions = `<button class="btn-danger" onclick="dismountValidator(${v.id})">Снять в ремонт</button>`;
           } else if (v.status === "В ремонте") {
-            actions = `<button class="btn-success" onclick="returnToStock(${v.id})">Вернуть на склад</button>`;
+            actions = `<button class="btn-success" onclick="returnToStock(${v.id})">Вернуть на склад</button>
+                       <button class="btn-danger" onclick="deleteValidator(${v.id})">Удалить</button>`;
+          } else {
+            actions = `<button class="btn-danger" onclick="deleteValidator(${v.id})">Удалить</button>`;
           }
 
           return `
             <tr>
               <td>#${v.id}</td>
-              <td><b>${esc(v.serial_number)}</b><br><small style="color:var(--muted)">${esc(v.mac_address)}</small></td>
-              <td>${esc(v.model)}<br><small style="color:var(--muted)">v${esc(v.firmware_version)}</small></td>
-              <td>${statusBadge(v.status)}</td>
-              <td>${netHtml}</td>
-              <td>${busHtml}</td>
-              <td>${actions}</td>
+              <td><b>${esc(v.serial_number)}</b><br><small style="color:var(--muted)">${esc(v.model)}</small></td>
+              <td>${badge(v.status)}</td>
+              <td>${badge(netStatus)}</td>
+              <td>${busText}</td>
+              <td><div class="actions">${actions}</div></td>
             </tr>
           `;
         }).join("");
 
-        // Telemetry validator selector
-        const sel = document.getElementById("telValidatorId");
-        const prevVal = sel.value;
-        sel.innerHTML = validators.map(v => `<option value="${v.id}">#${v.id} ${esc(v.serial_number)}</option>`).join("");
-        if (prevVal) sel.value = prevVal;
-
-        // Vehicles table
+        // 3. Автобусы
         document.getElementById("vehiclesBody").innerHTML = vehicles.map(b => `
           <tr>
             <td>#${b.id}</td>
             <td><b>${esc(b.bort_number)}</b></td>
             <td>${esc(b.route_number)}</td>
             <td>${esc(b.model)}</td>
-            <td>${b.is_active ? '<span class="badge b-green">Активен</span>' : '<span class="badge b-gray">В депо</span>'}</td>
+            <td>${b.is_active ? badge("На маршруте") : badge("В депо")}</td>
+            <td>
+              <div class="actions">
+                ${b.is_active
+                  ? `<button class="btn-warn" onclick="toggleVehicle(${b.id}, false)">Отправить в депо</button>`
+                  : `<button class="btn-success" onclick="toggleVehicle(${b.id}, true)">Выпустить на линию</button>`}
+                <button class="btn-danger" onclick="deleteVehicle(${b.id})">Удалить</button>
+              </div>
+            </td>
           </tr>
         `).join("");
 
-        // Telemetry table
-        document.getElementById("telemetryBody").innerHTML = telemetry.map(t => {
-          const hot = t.temperature > 75;
-          const time = new Date(t.recorded_at).toLocaleTimeString();
-          return `
-            <tr>
-              <td>#${t.id}</td>
-              <td>#${t.validator_id}</td>
-              <td style="${hot ? 'color:var(--red);font-weight:700' : ''}">${t.temperature}°C</td>
-              <td>${t.voltage}В</td>
-              <td>${t.nfc_is_working ? '<span class="badge b-green">OK</span>' : '<span class="badge b-red">Сбой</span>'}</td>
-              <td>${esc(time)}</td>
-            </tr>
-          `;
-        }).join("");
+        // 4. Телеметрия
+        const sel = document.getElementById("telValidatorId");
+        const prevVal = sel.value;
+        sel.innerHTML = validators.map(v => `<option value="${v.id}">#${v.id} — ${esc(v.serial_number)} (${esc(v.status)})</option>`).join("");
+        if (prevVal && validators.some(v => String(v.id) === prevVal)) sel.value = prevVal;
 
-        // Incidents table
-        document.getElementById("incidentsBody").innerHTML = incidents.map(i => {
-          let btns = "";
-          if (i.status === "Открыт") {
-            btns += `<button onclick="takeIncident(${i.id})">Взять</button> `;
-          }
-          if (i.status !== "Закрыт") {
-            btns += `<button class="btn-success" onclick="closeIncident(${i.id})">Закрыть</button>`;
-          }
-          return `
-            <tr>
-              <td>#${i.id}</td>
-              <td>#${i.validator_id}</td>
-              <td><b>${esc(i.error_type)}</b><br><small style="color:var(--muted)">${esc(i.severity)}</small></td>
-              <td>${statusBadge(i.status)}</td>
-              <td>${esc(i.engineer_comment) || "—"}</td>
-              <td style="white-space:nowrap">${btns}</td>
-            </tr>
-          `;
-        }).join("");
-
-        // Notifications table
-        document.getElementById("notificationsBody").innerHTML = notifications.map(n => `
+        document.getElementById("telemetryBody").innerHTML = telemetry.map(t => `
           <tr>
-            <td>#${n.id}</td>
-            <td>${esc(n.message)}</td>
-            <td>${n.is_read ? '<span class="badge b-gray">Прочитано</span>' : '<span class="badge b-red">Новое</span>'}</td>
-            <td>${n.is_read ? "" : `<button onclick="markRead(${n.id})">Прочитано</button>`}</td>
+            <td>#${t.id}</td>
+            <td>Валидатор #${t.validator_id}</td>
+            <td style="${t.temperature > 75 ? 'color:var(--red);font-weight:700' : ''}">${t.temperature}°C</td>
+            <td>${t.voltage} В</td>
+            <td>${t.nfc_is_working ? badge("ОК") : `<span class="badge b-red">Сбой</span>`}</td>
+            <td>${esc(new Date(t.recorded_at).toLocaleTimeString())}</td>
+            <td><button class="btn-danger" onclick="deleteTelemetry(${t.id})">Удалить</button></td>
           </tr>
         `).join("");
       } catch (err) {
@@ -506,6 +616,46 @@
       }
     }
 
+    // Действия с автобусами
+    async function createVehicle(e) {
+      e.preventDefault();
+      try {
+        await api("/vehicles", {
+          method: "POST",
+          body: JSON.stringify({
+            bort_number: document.getElementById("busBort").value.trim(),
+            route_number: document.getElementById("busRoute").value.trim(),
+            model: document.getElementById("busModel").value.trim(),
+            is_active: true,
+          }),
+        });
+        document.getElementById("busBort").value = "";
+        showToast("Автобус добавлен");
+        loadAll(false);
+      } catch (err) { showToast(err.message, true); }
+    }
+
+    async function toggleVehicle(id, isActive) {
+      try {
+        await api(`/vehicles/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ is_active: isActive }),
+        });
+        showToast(isActive ? "Автобус выпущен на маршрут" : "Автобус отправлен в депо");
+        loadAll(false);
+      } catch (err) { showToast(err.message, true); }
+    }
+
+    async function deleteVehicle(id) {
+      if (!confirm("Удалить этот автобус? Его валидаторы вернутся на склад.")) return;
+      try {
+        await api(`/vehicles/${id}`, { method: "DELETE" });
+        showToast("Автобус удалён");
+        loadAll(false);
+      } catch (err) { showToast(err.message, true); }
+    }
+
+    // Действия с валидаторами
     async function createValidator(e) {
       e.preventDefault();
       try {
@@ -520,26 +670,8 @@
         });
         document.getElementById("vSerial").value = "";
         document.getElementById("vMac").value = "";
-        showToast("Валидатор зарегистрирован");
-        loadAll();
-      } catch (err) { showToast(err.message, true); }
-    }
-
-    async function createVehicle(e) {
-      e.preventDefault();
-      try {
-        await api("/vehicles", {
-          method: "POST",
-          body: JSON.stringify({
-            bort_number: document.getElementById("busBort").value.trim(),
-            route_number: document.getElementById("busRoute").value.trim(),
-            model: document.getElementById("busModel").value.trim(),
-            is_active: true,
-          }),
-        });
-        document.getElementById("busBort").value = "";
-        showToast("ТС добавлено");
-        loadAll();
+        showToast("Валидатор добавлен на склад");
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
@@ -550,18 +682,18 @@
           method: "PUT",
           body: JSON.stringify({ vehicle_id: vehicleId }),
         });
-        showToast("Валидатор привязан к ТС");
-        loadAll();
+        showToast("Валидатор установлен в автобус");
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
     async function dismountValidator(id) {
-      const reason = prompt("Укажите причину снятия в ремонт:", "Перегрев / сбой ридера");
+      const reason = prompt("Причина снятия в ремонт:", "Сбой считывателя / перегрев");
       if (!reason) return;
       try {
         await api(`/validators/${id}/vehicle?reason=${encodeURIComponent(reason)}`, { method: "DELETE" });
         showToast("Валидатор снят в ремонт");
-        loadAll();
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
@@ -572,64 +704,80 @@
           body: JSON.stringify({ status: "На складе" }),
         });
         showToast("Валидатор возвращён на склад");
-        loadAll();
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
-    async function sendTelemetry(e) {
-      e.preventDefault();
+    async function deleteValidator(id) {
+      if (!confirm("Удалить валидатор из базы?")) return;
+      try {
+        await api(`/validators/${id}`, { method: "DELETE" });
+        showToast("Валидатор удалён");
+        loadAll(false);
+      } catch (err) { showToast(err.message, true); }
+    }
+
+    // Действия с телеметрией
+    async function sendPreset(temp, volt, nfc) {
+      const vId = Number(document.getElementById("telValidatorId").value);
+      if (!vId) return;
       try {
         const res = await api("/telemetry", {
           method: "POST",
-          body: JSON.stringify({
-            validator_id: Number(document.getElementById("telValidatorId").value),
-            temperature: Number(document.getElementById("telTemp").value),
-            voltage: Number(document.getElementById("telVolt").value),
-            nfc_is_working: document.getElementById("telNfc").checked,
-          }),
+          body: JSON.stringify({ validator_id: vId, temperature: temp, voltage: volt, nfc_is_working: nfc }),
         });
-        showToast(res.incident_triggered ? "Пакет принят — создан инцидент!" : "Телеметрия принята (норма)");
-        loadAll();
+        showToast(res.incident_triggered ? "Зафиксирована поломка — создан инцидент!" : "Пакет телеметрии принят (норма)");
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
+    async function deleteTelemetry(id) {
+      try {
+        await api(`/telemetry/${id}`, { method: "DELETE" });
+        loadAll(false);
+      } catch (err) { showToast(err.message, true); }
+    }
+
+    // Действия с инцидентами
     async function takeIncident(id) {
       try {
-        await api(`/incidents/${id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ status: "В работе" }),
-        });
-        showToast("Инцидент взят в работу");
-        loadAll();
+        await api(`/incidents/${id}`, { method: "PATCH", body: JSON.stringify({ status: "В работе" }) });
+        showToast("Взято в работу");
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
     async function closeIncident(id) {
-      const comment = prompt("Комментарий инженера по ремонту:", "Узел охлаждения заменён");
+      const comment = prompt("Что было сделано при ремонте?", "Замена кулера / сброс модуля NFC");
       if (comment === null) return;
       try {
         await api(`/incidents/${id}`, {
           method: "PATCH",
           body: JSON.stringify({ status: "Закрыт", engineer_comment: comment }),
         });
-        showToast("Инцидент закрыт");
-        loadAll();
+        showToast("Поломка закрыта");
+        loadAll(false);
+      } catch (err) { showToast(err.message, true); }
+    }
+
+    async function deleteIncident(id) {
+      try {
+        await api(`/incidents/${id}`, { method: "DELETE" });
+        showToast("Инцидент удалён");
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
     async function markRead(id) {
       try {
-        await api(`/notifications/${id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ is_read: true }),
-        });
-        loadAll();
+        await api(`/notifications/${id}`, { method: "PATCH", body: JSON.stringify({ is_read: true }) });
+        loadAll(false);
       } catch (err) { showToast(err.message, true); }
     }
 
-    loadAll();
+    loadAll(false);
     setInterval(() => {
-      if (document.getElementById("autoRefresh").checked) loadAll();
+      if (document.getElementById("autoRefresh").checked) loadAll(true);
     }, 5000);
   </script>
 </body>
